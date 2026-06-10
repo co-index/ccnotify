@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        run: make build VERSION=ci
+      - name: Smoke test
+        run: |
+          ./dist/ccnotify.app/Contents/MacOS/ccnotify -version
+          ./dist/ccnotify.app/Contents/MacOS/ccnotify -help
+      - name: Install layout
+        run: |
+          make install PREFIX="$PWD/test-prefix" VERSION=ci
+          test -x test-prefix/bin/ccnotify
+          test -x test-prefix/libexec/ccnotify.app/Contents/MacOS/ccnotify
+          test-prefix/bin/ccnotify -version

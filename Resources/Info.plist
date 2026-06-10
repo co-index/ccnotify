@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>CFBundlePackageType</key><string>APPL</string>
+  <key>CFBundleExecutable</key><string>ccnotify</string>
+  <key>CFBundleIdentifier</key><string>io.github.co-index.ccnotify</string>
+  <key>CFBundleName</key><string>ccnotify</string>
+  <key>CFBundleDisplayName</key><string>ccnotify</string>
+  <key>CFBundleShortVersionString</key><string>__VERSION__</string>
+  <key>CFBundleVersion</key><string>__VERSION__</string>
+  <key>CFBundleIconFile</key><string>ccnotify</string>
+  <key>LSUIElement</key><true/>
+  <key>LSMinimumSystemVersion</key><string>12.0</string>
+</dict>
+</plist>
