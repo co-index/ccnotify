@@ -170,7 +170,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
         if let running = NSRunningApplication.runningApplications(
             withBundleIdentifier: bundleID
         ).first {
-            running.activate(options: [.activateAllWindows])
+            // .activateIgnoringOtherApps is documented as a no-op since
+            // macOS 14, but empirically (macOS 26/27) activation only brings
+            // the app forward when it is passed. Keep it despite the
+            // deprecation warning; the open(1) fallback below covers any OS
+            // where it stops working entirely.
+            running.activate(options: [.activateIgnoringOtherApps, .activateAllWindows])
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
                 if NSWorkspace.shared.frontmostApplication?.bundleIdentifier == bundleID {
                     exit(0)
