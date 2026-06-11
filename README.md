@@ -140,6 +140,15 @@ cannot do this, and an app bundle can.
 Because the formula builds from source on your machine, no Apple Developer
 certificate or notarization is involved; the app is ad-hoc signed locally.
 
+### Troubleshooting
+
+- No banner at all: allow "ccnotify" under System Settings → Notifications
+  (the first post triggers the permission prompt).
+- Clicking does nothing (no app gets focused): upgrade to v1.1.1+. Older
+  versions could leave LaunchServices pointing at a deleted app path after
+  a brew upgrade; since v1.1.1 every post re-registers the live bundle, so
+  posting one notification heals the registration.
+
 ### License
 
 [MIT](LICENSE). Not affiliated with Apple or with
@@ -253,6 +262,14 @@ ccnotify 最初就是为 Claude Code 的通知 hook 而生：Claude 完成任务
 
 brew formula 在你本机从源码编译，因此不涉及 Apple 开发者证书或公证，
 应用使用本地 ad-hoc 签名。
+
+### 排障
+
+- 完全没有横幅：在系统设置 → 通知里允许 "ccnotify"（首次发送会触发授权
+  弹窗）。
+- 点击没反应（没有应用被聚焦）：升级到 v1.1.1+。旧版本在 brew 升级后,
+  LaunchServices 可能仍指向已删除的旧 app 路径；v1.1.1 起每次发送都会
+  重新注册当前 bundle，发一条通知即可自愈。
 
 ### 许可
 
