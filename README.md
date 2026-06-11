@@ -68,7 +68,7 @@ ccnotify -message "Deploy done" -image ./logo.png -sound default
 | `-title`    | Notification title (default: `ccnotify`)                       |
 | `-subtitle` | Notification subtitle                                          |
 | `-sound`    | `default`, a sound from `/System/Library/Sounds` (e.g. `Glass`, `Ping`), or a custom sound (see below) |
-| `-image`    | Path to an image (png/jpg/gif) shown on the banner             |
+| `-image`    | Image (png/jpg/gif) attached to the banner, shown as a thumbnail on its right |
 | `-activate` | Bundle id of the app to focus when the notification is clicked |
 | `-version`  | Print the version                                              |
 | `-help`     | Show help                                                      |
@@ -79,12 +79,15 @@ Find an app's bundle id with:
 osascript -e 'id of app "Visual Studio Code"'
 ```
 
-### Custom icon and sound
+### Banner image and custom sound
 
-- **Per-notification image**: `-image path/to.png` attaches the image to the
-  banner — handy for giving each project or pipeline its own visual identity.
-  (macOS always draws the small app icon itself; that one can only be changed
-  by rebuilding the app with your own `assets/ccnotify.icns`.)
+- **Banner image**: `-image path/to.png` attaches an image to the
+  notification. It appears as a small thumbnail on the right side of the
+  banner (click or long-press the notification to see it full size) — handy
+  for giving each project or pipeline its own visual identity. Note that the
+  app icon on the **left** of the banner cannot be changed per notification;
+  macOS always draws the posting app's own icon there. To change that one,
+  rebuild the app with your own `assets/ccnotify.icns`.
 - **Custom sound**: drop an `.aiff` file into `~/Library/Sounds` and pass its
   name without the extension, e.g. `-sound MySound`. `-sound default` plays
   the system default notification sound.
@@ -168,12 +171,13 @@ ccnotify -message "部署完成" -image ./logo.png -sound default
 osascript -e 'id of app "Visual Studio Code"'
 ```
 
-### 自定义图标和声音
+### 横幅附图与自定义声音
 
-- **横幅图片**：`-image path/to.png` 会把图片附加到横幅上，适合给不同
-  项目或流水线配不同的视觉标识。（横幅左侧的小图标是 app 自身图标，
-  macOS 不允许按条替换；想换它需要用自己的 `assets/ccnotify.icns`
-  重新构建。）
+- **横幅附图**：`-image path/to.png` 把图片附加到通知上，以**右侧小
+  缩略图**的形式显示（点开或长按通知可看大图），适合给不同项目或流水
+  线配不同的视觉标识。注意横幅**左侧**的 app 图标无法按条替换——
+  macOS 固定显示发通知的 app 自身图标；想换它需要用自己的
+  `assets/ccnotify.icns` 重新构建。
 - **自定义声音**：把 `.aiff` 文件放进 `~/Library/Sounds`，然后传不带
   扩展名的文件名，如 `-sound MySound`；`-sound default` 播放系统默认
   通知音。

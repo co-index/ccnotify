@@ -31,7 +31,8 @@ let usage = """
       -subtitle  Notification subtitle
       -sound     "default", a sound from /System/Library/Sounds (e.g. Glass,
                  Ping), or a custom sound file's name from ~/Library/Sounds
-      -image     Path to an image (png/jpg/gif) shown on the banner
+      -image     Image (png/jpg/gif) attached to the banner, shown as a
+                 thumbnail on its right (the left app icon cannot change)
       -activate  Bundle id of the app to focus when the notification is clicked
       -help      Show this help
       -version   Print the version
