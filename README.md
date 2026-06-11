@@ -20,10 +20,11 @@ A tiny, modern replacement for `terminal-notifier`, built on
 ### Why
 
 [terminal-notifier](https://github.com/julienXX/terminal-notifier) pioneered
-command-line notifications on macOS, but it has been unmaintained since 2018
-and uses the deprecated `NSUserNotification` API. ccnotify keeps its
-command-line interface and its clever app-bundle architecture, reimplemented
-from scratch on the modern `UNUserNotificationCenter` API.
+command-line notifications on macOS, but its latest release (2.0.0, from
+2017) still builds on the deprecated `NSUserNotification` API, and the v3
+rewrite is still brewing on a branch. ccnotify keeps its command-line
+interface and its clever app-bundle architecture, reimplemented from scratch
+on the modern `UNUserNotificationCenter` API — and shipping today.
 
 The headline feature: **clicking a notification focuses the app you choose** —
 pass `-activate` with a bundle id and the click jumps you back to your
@@ -103,9 +104,10 @@ interface design this project gratefully follows.
 ### 为什么做这个
 
 [terminal-notifier](https://github.com/julienXX/terminal-notifier) 开创了
-macOS 命令行通知，但它自 2018 年起停止维护，使用的 `NSUserNotification`
-API 也早已废弃。ccnotify 保留了它的命令行接口和 app 壳架构，用现代的
-`UNUserNotificationCenter` API 从零重新实现，约 150 行 Swift，零依赖。
+macOS 命令行通知，但它已发布的最新版本（2017 年的 2.0.0）仍基于早已废弃
+的 `NSUserNotification` API，v3 重写还在分支上进行、尚未发版。ccnotify
+保留了它的命令行接口和 app 壳架构，用现代的 `UNUserNotificationCenter`
+API 从零重新实现并已可用，约 150 行 Swift，零依赖。
 
 核心特性：**点击通知可以聚焦你指定的应用**——通过 `-activate` 传入
 bundle id，点击横幅即可跳回你的终端、编辑器或任何应用。
