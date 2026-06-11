@@ -92,6 +92,34 @@ osascript -e 'id of app "Visual Studio Code"'
   name without the extension, e.g. `-sound MySound`. `-sound default` plays
   the system default notification sound.
 
+### Changing the app icon
+
+The left icon belongs to the app bundle, so changing it means building from
+source with your own icon:
+
+```sh
+git clone https://github.com/co-index/ccnotify.git
+cd ccnotify
+
+# Turn a 1024x1024 PNG (with transparency) into the icns:
+mkdir ccnotify.iconset
+for s in 16 32 128 256 512; do
+  sips -z $s $s my-icon.png --out ccnotify.iconset/icon_${s}x${s}.png
+  sips -z $((s*2)) $((s*2)) my-icon.png --out ccnotify.iconset/icon_${s}x${s}@2x.png
+done
+iconutil -c icns ccnotify.iconset -o assets/ccnotify.icns
+
+sudo make install        # replaces the brew-installed shim if /usr/local/bin comes first
+```
+
+If macOS keeps showing the old icon (LaunchServices caches it), re-register
+the app and restart Notification Center:
+
+```sh
+/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister -f /usr/local/libexec/ccnotify.app
+killall NotificationCenter
+```
+
 ### Use with Claude Code
 
 ccnotify was born as the notifier behind a Claude Code hook setup: get a
@@ -181,6 +209,33 @@ osascript -e 'id of app "Visual Studio Code"'
 - **自定义声音**：把 `.aiff` 文件放进 `~/Library/Sounds`，然后传不带
   扩展名的文件名，如 `-sound MySound`；`-sound default` 播放系统默认
   通知音。
+
+### 更换左侧 app 图标
+
+左侧图标属于 app 包本身，更换它需要用自己的图标从源码构建：
+
+```sh
+git clone https://github.com/co-index/ccnotify.git
+cd ccnotify
+
+# 把一张 1024x1024 的透明背景 PNG 转成 icns：
+mkdir ccnotify.iconset
+for s in 16 32 128 256 512; do
+  sips -z $s $s my-icon.png --out ccnotify.iconset/icon_${s}x${s}.png
+  sips -z $((s*2)) $((s*2)) my-icon.png --out ccnotify.iconset/icon_${s}x${s}@2x.png
+done
+iconutil -c icns ccnotify.iconset -o assets/ccnotify.icns
+
+sudo make install        # 若 /usr/local/bin 在 PATH 更前面，会盖过 brew 安装的版本
+```
+
+如果 macOS 仍显示旧图标（LaunchServices 有缓存），重新注册 app 并重启
+通知中心：
+
+```sh
+/System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister -f /usr/local/libexec/ccnotify.app
+killall NotificationCenter
+```
 
 ### 搭配 Claude Code
 
