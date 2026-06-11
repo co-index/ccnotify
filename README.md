@@ -70,6 +70,7 @@ ccnotify -message "Deploy done" -image ./logo.png -sound default
 | `-sound`    | `default`, a sound from `/System/Library/Sounds` (e.g. `Glass`, `Ping`), or a custom sound (see below) |
 | `-image`    | Image (png/jpg/gif) attached to the banner, shown as a thumbnail on its right |
 | `-activate` | Bundle id of the app to focus when the notification is clicked |
+| `-doctor`   | Diagnose the setup: registered copies, click routing, notification permission |
 | `-version`  | Print the version                                              |
 | `-help`     | Show help                                                      |
 
@@ -141,6 +142,18 @@ Because the formula builds from source on your machine, no Apple Developer
 certificate or notarization is involved; the app is ad-hoc signed locally.
 
 ### Troubleshooting
+
+Start with the built-in self-check (v1.2.0+):
+
+```sh
+ccnotify -doctor
+```
+
+It re-registers the installed copy with LaunchServices, shows where a
+notification click would route, lists every registered copy of the app
+(with the exact cleanup command for stale or leftover ones, e.g. old
+Homebrew kegs or manual installs), and reports the notification
+permission status.
 
 - No banner at all: allow "ccnotify" under System Settings → Notifications
   (the first post triggers the permission prompt).
@@ -264,6 +277,16 @@ brew formula 在你本机从源码编译，因此不涉及 Apple 开发者证书
 应用使用本地 ad-hoc 签名。
 
 ### 排障
+
+先用内置自检（v1.2.0+）：
+
+```sh
+ccnotify -doctor
+```
+
+它会把当前安装的副本重新注册到 LaunchServices、显示点击通知会路由到
+哪个副本、列出系统里注册过的所有同名副本（对残留的旧 Homebrew keg 或
+手工安装的副本直接给出对应的清理命令），并报告通知授权状态。
 
 - 完全没有横幅：在系统设置 → 通知里允许 "ccnotify"（首次发送会触发授权
   弹窗）。

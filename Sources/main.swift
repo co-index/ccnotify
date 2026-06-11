@@ -34,6 +34,8 @@ let usage = """
       -image     Image (png/jpg/gif) attached to the banner, shown as a
                  thumbnail on its right (the left app icon cannot change)
       -activate  Bundle id of the app to focus when the notification is clicked
+      -doctor    Diagnose the setup: registered copies, click routing,
+                 notification permission
       -help      Show this help
       -version   Print the version
 
@@ -57,6 +59,122 @@ if args.contains("-help") || args.contains("--help") || args.contains("-h") {
 if args.contains("-version") || args.contains("--version") {
     print("ccnotify \(toolVersion)")
     exit(0)
+}
+
+// lsregister is Apple's LaunchServices maintenance tool; it has lived at this
+// path for many macOS releases and is the only way to remove a registration.
+let lsregisterPath =
+    "/System/Library/Frameworks/CoreServices.framework/Versions/A/"
+    + "Frameworks/LaunchServices.framework/Versions/A/Support/lsregister"
+
+func runDoctor() -> Never {
+    var problems = 0
+    print("ccnotify \(toolVersion) doctor")
+    print("")
+
+    guard let bundleID = Bundle.main.bundleIdentifier else {
+        print("error: not running from an app bundle, so notifications cannot work.")
+        print("Install via Homebrew instead: brew install co-index/tap/ccnotify")
+        exit(1)
+    }
+    let selfURL = Bundle.main.bundleURL.standardizedFileURL
+    print("  bundle id:    \(bundleID)")
+    print("  this copy:    \(selfURL.path)")
+
+    // Healing step: after a brew upgrade LaunchServices can still point at
+    // the deleted old keg; re-registering makes this copy authoritative.
+    LSRegisterURL(selfURL as CFURL, true)
+    print("  registered:   this copy re-registered with LaunchServices")
+    print("")
+
+    // Where a notification click would route right now.
+    if let resolved = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleID) {
+        let resolvedPath = resolved.standardizedFileURL.path
+        if resolvedPath == selfURL.path {
+            print("  click target: this copy ✓")
+        } else {
+            problems += 1
+            print("  click target: \(resolvedPath)")
+            print("                WARNING: clicks route to a different copy. Remove it")
+            print("                (see below) or post one notification from this copy")
+            print("                to take routing over.")
+        }
+    } else {
+        problems += 1
+        print("  click target: UNRESOLVED — LaunchServices cannot find \(bundleID)")
+    }
+    print("")
+
+    print("  registered copies:")
+    let copies = NSWorkspace.shared.urlsForApplications(withBundleIdentifier: bundleID)
+    if copies.isEmpty {
+        print("    (none — LaunchServices returned no results)")
+    }
+    for url in copies {
+        let path = url.standardizedFileURL.path
+        if path == selfURL.path {
+            print("    ok  \(path)  (this copy)")
+            continue
+        }
+        problems += 1
+        if !FileManager.default.fileExists(atPath: path) {
+            print("    !!  \(path)")
+            print("        gone from disk — stale registration. Clean up with:")
+            print("        \(lsregisterPath) -u '\(path)'")
+        } else if path.contains("/Cellar/ccnotify/") {
+            print("    !!  \(path)")
+            print("        old Homebrew keg. Clean up with: brew cleanup ccnotify")
+        } else {
+            print("    !!  \(path)")
+            print("        extra copy — if it ever posts, it steals click routing.")
+            print("        If it is not yours on purpose, remove it with:")
+            print("        \(lsregisterPath) -u '\(path)'")
+        }
+    }
+    print("")
+
+    let semaphore = DispatchSemaphore(value: 0)
+    var status = UNAuthorizationStatus.notDetermined
+    var alert = UNNotificationSetting.notSupported
+    UNUserNotificationCenter.current().getNotificationSettings { settings in
+        status = settings.authorizationStatus
+        alert = settings.alertSetting
+        semaphore.signal()
+    }
+    if semaphore.wait(timeout: .now() + 5) == .timedOut {
+        problems += 1
+        print("  permission:   check timed out — notification daemon not responding")
+    } else {
+        switch status {
+        case .authorized, .provisional, .ephemeral:
+            if alert == .enabled {
+                print("  permission:   authorized — banners enabled")
+            } else {
+                problems += 1
+                print("  permission:   authorized, but alerts are OFF —")
+                print("                enable them under System Settings → Notifications → ccnotify")
+            }
+        case .denied:
+            problems += 1
+            print("  permission:   DENIED — allow ccnotify under System Settings → Notifications")
+        case .notDetermined:
+            print("  permission:   not requested yet — the first post will ask")
+        @unknown default:
+            print("  permission:   unknown status (\(status.rawValue))")
+        }
+    }
+
+    print("")
+    if problems == 0 {
+        print("  no problems found.")
+        exit(0)
+    }
+    print("  \(problems) potential issue(s) found — see above.")
+    exit(1)
+}
+
+if args.contains("-doctor") {
+    runDoctor()
 }
 
 let message = value(after: "-message")
