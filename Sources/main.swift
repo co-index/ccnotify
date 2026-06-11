@@ -23,13 +23,15 @@ let usage = """
 
     Usage:
       ccnotify -message <text> [-title <text>] [-subtitle <text>]
-               [-sound <name>] [-activate <bundle-id>]
+               [-sound <name>] [-image <path>] [-activate <bundle-id>]
 
     Options:
       -message   Notification body (required)
       -title     Notification title (default: ccnotify)
       -subtitle  Notification subtitle
-      -sound     Sound name from /System/Library/Sounds (e.g. Glass, Ping)
+      -sound     "default", a sound from /System/Library/Sounds (e.g. Glass,
+                 Ping), or a custom sound file's name from ~/Library/Sounds
+      -image     Path to an image (png/jpg/gif) shown on the banner
       -activate  Bundle id of the app to focus when the notification is clicked
       -help      Show this help
       -version   Print the version
@@ -60,6 +62,7 @@ let message = value(after: "-message")
 let titleArg = value(after: "-title") ?? "ccnotify"
 let subtitleArg = value(after: "-subtitle")
 let soundArg = value(after: "-sound")
+let imageArg = value(after: "-image")
 let activateArg = value(after: "-activate")
 
 // A notification click relaunches the app with no arguments and no tty.
@@ -74,6 +77,27 @@ if message == nil {
 
 func exitSoon(_ seconds: Double) {
     DispatchQueue.main.asyncAfter(deadline: .now() + seconds) { exit(0) }
+}
+
+// The system moves attached files into its own store, so attach a copy to
+// leave the caller's file untouched.
+func makeAttachment(from path: String) -> UNNotificationAttachment? {
+    let source = URL(fileURLWithPath: (path as NSString).expandingTildeInPath)
+    guard FileManager.default.fileExists(atPath: source.path) else {
+        FileHandle.standardError.write(Data("ccnotify: image not found: \(path)\n".utf8))
+        return nil
+    }
+    let copy = URL(fileURLWithPath: NSTemporaryDirectory())
+        .appendingPathComponent(UUID().uuidString)
+        .appendingPathExtension(source.pathExtension)
+    do {
+        try FileManager.default.copyItem(at: source, to: copy)
+        return try UNNotificationAttachment(identifier: "image", url: copy)
+    } catch {
+        FileHandle.standardError.write(
+            Data("ccnotify: cannot attach image: \(error.localizedDescription)\n".utf8))
+        return nil
+    }
 }
 
 final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCenterDelegate {
@@ -96,7 +120,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
             }
             content.body = body
             if let sound = soundArg {
-                content.sound = UNNotificationSound(named: UNNotificationSoundName(sound))
+                content.sound =
+                    sound == "default"
+                    ? .default
+                    : UNNotificationSound(named: UNNotificationSoundName(sound))
+            }
+            if let imagePath = imageArg, let attachment = makeAttachment(from: imagePath) {
+                content.attachments = [attachment]
             }
             if let bundleID = activateArg {
                 content.userInfo["activate"] = bundleID

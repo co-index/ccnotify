@@ -30,6 +30,12 @@ The headline feature: **clicking a notification focuses the app you choose** —
 pass `-activate` with a bundle id and the click jumps you back to your
 terminal, editor, or anything else.
 
+![ccnotify banner](docs/notification.png)
+
+ccnotify is a general-purpose tool: despite the name, nothing in it is
+specific to Claude Code. Use it from CI pipelines, cron jobs, build scripts,
+git hooks — anything that can run a shell command.
+
 ### Install
 
 ```sh
@@ -53,6 +59,7 @@ under System Settings → Notifications if banners do not appear.
 ccnotify -message "Build finished"
 ccnotify -title "CI" -subtitle "main" -message "All tests passed" -sound Glass
 ccnotify -message "Click me" -activate com.microsoft.VSCode
+ccnotify -message "Deploy done" -image ./logo.png -sound default
 ```
 
 | Flag        | Meaning                                                        |
@@ -60,7 +67,8 @@ ccnotify -message "Click me" -activate com.microsoft.VSCode
 | `-message`  | Notification body (required)                                   |
 | `-title`    | Notification title (default: `ccnotify`)                       |
 | `-subtitle` | Notification subtitle                                          |
-| `-sound`    | Sound name from `/System/Library/Sounds` (e.g. `Glass`, `Ping`)|
+| `-sound`    | `default`, a sound from `/System/Library/Sounds` (e.g. `Glass`, `Ping`), or a custom sound (see below) |
+| `-image`    | Path to an image (png/jpg/gif) shown on the banner             |
 | `-activate` | Bundle id of the app to focus when the notification is clicked |
 | `-version`  | Print the version                                              |
 | `-help`     | Show help                                                      |
@@ -70,6 +78,16 @@ Find an app's bundle id with:
 ```sh
 osascript -e 'id of app "Visual Studio Code"'
 ```
+
+### Custom icon and sound
+
+- **Per-notification image**: `-image path/to.png` attaches the image to the
+  banner — handy for giving each project or pipeline its own visual identity.
+  (macOS always draws the small app icon itself; that one can only be changed
+  by rebuilding the app with your own `assets/ccnotify.icns`.)
+- **Custom sound**: drop an `.aiff` file into `~/Library/Sounds` and pass its
+  name without the extension, e.g. `-sound MySound`. `-sound default` plays
+  the system default notification sound.
 
 ### Use with Claude Code
 
@@ -112,6 +130,12 @@ API 从零重新实现并已可用，约 150 行 Swift，零依赖。
 核心特性：**点击通知可以聚焦你指定的应用**——通过 `-activate` 传入
 bundle id，点击横幅即可跳回你的终端、编辑器或任何应用。
 
+![ccnotify 横幅](docs/notification.png)
+
+ccnotify 是通用工具：虽然名字带 cc，但内部没有任何与 Claude Code 耦合
+的逻辑。CI 流水线、cron 任务、构建脚本、git hook——任何能执行 shell
+命令的地方都能用它。
+
 ### 安装
 
 ```sh
@@ -135,6 +159,7 @@ sudo make install            # 默认 PREFIX=/usr/local
 ccnotify -message "构建完成"
 ccnotify -title "CI" -subtitle "main" -message "测试全部通过" -sound Glass
 ccnotify -message "点我跳回 VS Code" -activate com.microsoft.VSCode
+ccnotify -message "部署完成" -image ./logo.png -sound default
 ```
 
 参数含义见上方英文表格。查询应用 bundle id：
@@ -142,6 +167,16 @@ ccnotify -message "点我跳回 VS Code" -activate com.microsoft.VSCode
 ```sh
 osascript -e 'id of app "Visual Studio Code"'
 ```
+
+### 自定义图标和声音
+
+- **横幅图片**：`-image path/to.png` 会把图片附加到横幅上，适合给不同
+  项目或流水线配不同的视觉标识。（横幅左侧的小图标是 app 自身图标，
+  macOS 不允许按条替换；想换它需要用自己的 `assets/ccnotify.icns`
+  重新构建。）
+- **自定义声音**：把 `.aiff` 文件放进 `~/Library/Sounds`，然后传不带
+  扩展名的文件名，如 `-sound MySound`；`-sound default` 播放系统默认
+  通知音。
 
 ### 搭配 Claude Code
 
