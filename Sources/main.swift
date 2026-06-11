@@ -112,6 +112,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
     }
 
     private func post(body: String) {
+        // Re-register this bundle with LaunchServices on every post. Brew
+        // upgrades move the app to a new versioned Cellar path; without
+        // this, a click can resolve the bundle id to a stale, deleted copy
+        // and silently fail to relaunch the app.
+        LSRegisterURL(Bundle.main.bundleURL as CFURL, true)
         let center = UNUserNotificationCenter.current()
         center.requestAuthorization(options: [.alert, .sound]) { _, _ in
             let content = UNMutableNotificationContent()
