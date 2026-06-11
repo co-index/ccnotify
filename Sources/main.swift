@@ -161,6 +161,30 @@ final class AppDelegate: NSObject, NSApplicationDelegate, UNUserNotificationCent
             exitSoon(0.2)
             return
         }
+        // openApplication(activates:) reports success but does not bring an
+        // already-running app forward on macOS 14+ — cooperative activation
+        // ignores the request from a background accessory app. Activating
+        // the running process directly does work; if the app still is not
+        // frontmost afterwards, /usr/bin/open performs a full LaunchServices
+        // activation as a last resort.
+        if let running = NSRunningApplication.runningApplications(
+            withBundleIdentifier: bundleID
+        ).first {
+            running.activate(options: [.activateAllWindows])
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                if NSWorkspace.shared.frontmostApplication?.bundleIdentifier == bundleID {
+                    exit(0)
+                }
+                let task = Process()
+                task.executableURL = URL(fileURLWithPath: "/usr/bin/open")
+                task.arguments = ["-b", bundleID]
+                try? task.run()
+                task.waitUntilExit()
+                exit(0)
+            }
+            exitSoon(6)
+            return
+        }
         let configuration = NSWorkspace.OpenConfiguration()
         configuration.activates = true
         NSWorkspace.shared.openApplication(at: url, configuration: configuration) { _, _ in
